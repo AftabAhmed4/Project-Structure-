@@ -1,239 +1,343 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import Footer from "@/components/Footer";
+import { useEffect, useState } from "react";
+
+type Todo = {
+  id: number;
+  title: string;
+  completed: boolean;
+};
+
 
 export default function Home() {
 
-  const [open, setOpen] = useState(false);
+  const [task, setTask] = useState("");
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [editId, setEditId] = useState<number | null>(null);
+
+
+  // Load Local Storage
+  useEffect(() => {
+
+    const data = localStorage.getItem("todos");
+
+    if(data){
+      setTodos(JSON.parse(data));
+    }
+
+  }, []);
+
+
+
+  // Save Local Storage
+  useEffect(() => {
+
+    localStorage.setItem(
+      "todos",
+      JSON.stringify(todos)
+    );
+
+  }, [todos]);
+
+
+
+
+  // Add / Update
+  const saveTodo = () => {
+
+    if(task.trim() === "") return;
+
+
+    if(editId){
+
+      setTodos(
+        todos.map((todo)=>
+          todo.id === editId
+          ? {...todo,title:task}
+          : todo
+        )
+      );
+
+      setEditId(null);
+
+
+    }else{
+
+
+      const newTodo = {
+        id:Date.now(),
+        title:task,
+        completed:false
+      };
+
+
+      setTodos([
+        ...todos,
+        newTodo
+      ]);
+
+    }
+
+
+    setTask("");
+
+  };
+
+
+
+
+
+  // Edit
+  const editTodo = (todo:Todo)=>{
+
+    setTask(todo.title);
+    setEditId(todo.id);
+
+  };
+
+
+
+
+
+  // Delete
+  const deleteTodo = (id:number)=>{
+
+    setTodos(
+      todos.filter(
+        todo=>todo.id !== id
+      )
+    );
+
+  };
+
+
+
+
+
+  // Complete
+  const completeTodo = (id:number)=>{
+
+    setTodos(
+      todos.map(todo=>
+        todo.id === id
+        ? {
+          ...todo,
+          completed:!todo.completed
+        }
+        : todo
+      )
+    );
+
+  };
+
+
+
+
 
   return (
-    <div>
 
-      <nav className="fixed top-0 left-0 w-full z-50 bg-gray-900 text-white shadow-lg">
-        <div className=" mx-auto px-4 sm:px-6 lg:px-8">
-
-          <div className="flex justify-between items-center h-16">
-
-            {/* Logo */}
-            <Link 
-              href="/"
-              className="text-2xl font-bold text-blue-400"
-            >
-              Aftab Dev
-            </Link>
+    <main className="
+      min-h-screen
+      bg-gradient-to-br
+      from-gray-950
+      via-gray-900
+      to-blue-950
+      flex
+      items-center
+      justify-center
+      p-5
+    ">
 
 
-            {/* Desktop Menu */}
-            <div className="hidden md:flex space-x-8">
-
-              <Link href="/" className="hover:text-blue-400">
-                Home
-              </Link>
-
-              <Link href="/about" className="hover:text-blue-400">
-                About
-              </Link>
-
-              <Link href="/projects" className="hover:text-blue-400">
-                Projects
-              </Link>
-
-              <Link href="/contact" className="hover:text-blue-400">
-                Contact
-              </Link>
-
-            </div>
+      <div className="
+        w-full
+        max-w-xl
+        bg-white/10
+        backdrop-blur-xl
+        border
+        border-white/20
+        rounded-3xl
+        shadow-2xl
+        p-6
+        text-white
+      ">
 
 
-            {/* Button */}
-            <Link
-              href="/contact"
-              className="hidden md:block bg-blue-600 px-5 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Hire Me
-            </Link>
-
-
-            {/* Mobile Toggle */}
-            <button
-              onClick={() => setOpen(!open)}
-              className="md:hidden text-3xl"
-            >
-              {open ? "✕" : "☰"}
-            </button>
-
-          </div>
-
-
-          {/* Mobile Menu */}
-          {open && (
-            <div className="md:hidden pb-4 space-y-3">
-
-              <Link 
-                href="/"
-                className="block hover:text-blue-400"
-                onClick={() => setOpen(false)}
-              >
-                Home
-              </Link>
-
-              <Link 
-                href="/about"
-                className="block hover:text-blue-400"
-                onClick={() => setOpen(false)}
-              >
-                About
-              </Link>
-
-              <Link 
-                href="/projects"
-                className="block hover:text-blue-400"
-                onClick={() => setOpen(false)}
-              >
-                Projects
-              </Link>
-
-              <Link 
-                href="/contact"
-                className="block hover:text-blue-400"
-                onClick={() => setOpen(false)}
-              >
-                Contact
-              </Link>
-
-
-              <Link
-                href="/contact"
-                className="block text-center bg-blue-600 px-5 py-2 rounded-lg"
-                onClick={() => setOpen(false)}
-              >
-                Hire Me
-              </Link>
-
-            </div>
-          )}
-
-        </div>
-      </nav>
-
-
-      {/* <div className="pt-20 flex justify-center items-center h-screen">
-        <h1 className="text-4xl">
-          hero section 
-        </h1>
-      </div> */}
-      <section className="pt-20 min-h-screen flex items-center bg-gray-950 text-white">
-
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-    <div className="grid md:grid-cols-2 gap-10 items-center">
-
-
-      {/* Left Content */}
-      <div>
-
-        <p className="text-blue-400 text-lg font-semibold mb-3">
-          Welcome to my portfolio
-        </p>
-
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-          Hi, I'm 
-          <span className="text-blue-500"> Aftab Ahmed</span>
+        <h1 className="
+          text-4xl
+          font-bold
+          text-center
+          mb-8
+        ">
+          🚀 Todo App
         </h1>
 
 
-        <h2 className="text-2xl mt-4 text-gray-300">
-          Full Stack Web Developer
-        </h2>
+
+        {/* Input */}
+
+        <div className="flex gap-3">
 
 
-        <p className="mt-5 text-gray-400 text-lg max-w-xl">
-          I build modern, responsive and scalable web applications
-          using Next.js, React, Node.js, Express and databases.
-        </p>
+          <input
+            value={task}
+            onChange={(e)=>setTask(e.target.value)}
+            placeholder="Write your task..."
+            className="
+              flex-1
+              px-4
+              py-3
+              rounded-xl
+              bg-white
+              text-black
+              outline-none
+            "
+          />
 
 
-        {/* Buttons */}
-        <div className="flex gap-4 mt-8">
-
-          <button className="
-            bg-blue-600 
-            hover:bg-blue-700 
-            px-6 
-            py-3 
-            rounded-xl 
-            font-semibold
-            transition
-          ">
-            Hire Me
+          <button
+            onClick={saveTodo}
+            className="
+              bg-blue-600
+              hover:bg-blue-700
+              px-6
+              rounded-xl
+              font-semibold
+              transition
+            "
+          >
+            {
+              editId
+              ? "Update"
+              : "Add"
+            }
           </button>
 
-
-          <button className="
-            border 
-            border-gray-600 
-            hover:bg-gray-800
-            px-6 
-            py-3 
-            rounded-xl
-            transition
-          ">
-            View Projects
-          </button>
 
         </div>
 
 
-      </div>
 
 
 
-      {/* Right Image / Card */}
-      <div className="flex justify-center">
+        {/* Todo List */}
 
         <div className="
-          w-72 h-72 
-          md:w-96 md:h-96
-          rounded-full
-          bg-gradient-to-r
-          from-blue-600
-          to-purple-600
-          flex
-          items-center
-          justify-center
-          shadow-2xl
+          mt-8
+          space-y-4
         ">
 
-          <div className="
-            w-64 h-64
-            md:w-80 md:h-80
-            rounded-full
-            bg-gray-900
-            flex
-            items-center
-            justify-center
-          ">
 
-            <h2 className="text-5xl font-bold text-blue-400">
-              AA
-            </h2>
+        {
+          todos.length === 0 ? (
 
-          </div>
+            <p className="
+              text-center
+              text-gray-300
+            ">
+              No tasks available
+            </p>
+
+          ):(
+
+          todos.map(todo=>(
+
+
+            <div
+              key={todo.id}
+              className="
+                flex
+                items-center
+                justify-between
+                bg-white/10
+                border
+                border-white/20
+                rounded-xl
+                p-4
+              "
+            >
+
+
+              <div className="flex items-center gap-3">
+
+
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={()=>completeTodo(todo.id)}
+                  className="w-5 h-5"
+                />
+
+
+                <span
+                  className={`
+                    ${
+                    todo.completed
+                    ?
+                    "line-through text-gray-400"
+                    :
+                    ""
+                    }
+                  `}
+                >
+                  {todo.title}
+                </span>
+
+
+              </div>
+
+
+
+              <div className="flex gap-2">
+
+
+                <button
+                  onClick={()=>editTodo(todo)}
+                  className="
+                    bg-yellow-500
+                    px-3
+                    py-1
+                    rounded-lg
+                    text-black
+                  "
+                >
+                  Edit
+                </button>
+
+
+                <button
+                  onClick={()=>deleteTodo(todo.id)}
+                  className="
+                    bg-red-600
+                    px-3
+                    py-1
+                    rounded-lg
+                  "
+                >
+                  Delete
+                </button>
+
+
+              </div>
+
+
+            </div>
+
+
+          ))
+
+          )
+        }
+
 
         </div>
+
+
 
       </div>
 
 
-    </div>
+    </main>
 
-  </div>
-
-</section>
-
-<Footer />
-    </div>
   );
 }
